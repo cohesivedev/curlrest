@@ -8,7 +8,7 @@ cURL as a REST API running on NodeJS.
 
 Run the app from the CLI with basic auth setup:
 ```bash
-USERNAME=hello PASSWORD=world node index.mjs
+PORT=3001 USERNAME=hello PASSWORD=world node index.mjs
 ```
 
 Client side code:

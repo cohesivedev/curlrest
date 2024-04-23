@@ -23,5 +23,5 @@ curlRoutes.addTo(app);
 
 serve({
     fetch: app.fetch,
-    port: 3001,
+    port: process.env.PORT || 3001,
 }, info => console.log(`Ready on port ${info.port}`));
