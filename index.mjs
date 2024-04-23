@@ -23,7 +23,6 @@ app.use('/*', async (c, next) => {
     return authMiddleware(c, next);
 });
 
-
 curlRoutes.addTo(app);
 
 serve({
