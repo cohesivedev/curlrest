@@ -4,10 +4,14 @@ cURL as a REST API running on NodeJS.
 
 ## Examples
 
+### Use with a proxy service
+
+Run the app from the CLI with basic auth setup:
 ```bash
 USERNAME=hello PASSWORD=world node index.mjs
 ```
 
+Client side code:
 ```js
 const username = 'hello';
 const password = 'world';

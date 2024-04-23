@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 import curlRoutes from './routes/curlRoutes.mjs';
+import { cors } from 'hono/cors';
 
 const app = new Hono();
 
@@ -15,6 +16,8 @@ app.use('/*', async (c, next) => {
 
     return authMiddleware(c, next);
 });
+
+app.use('/api/*', cors());
 
 curlRoutes.addTo(app);
 
