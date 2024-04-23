@@ -17,7 +17,7 @@ app.use('/*', async (c, next) => {
     return authMiddleware(c, next);
 });
 
-app.use('/api/*', cors({
+app.use('/*', cors({
     origin: '*',
     allowMethods: ['POST', 'GET', 'OPTIONS'],
     credentials: true,
