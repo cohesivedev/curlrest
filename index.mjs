@@ -6,6 +6,12 @@ import { cors } from 'hono/cors';
 
 const app = new Hono();
 
+app.use('/*', cors({
+    origin: '*',
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    credentials: true,
+}));
+
 let authMiddleware = null;
 app.use('/*', async (c, next) => {
     // Allocate basic auth middleware
@@ -17,11 +23,6 @@ app.use('/*', async (c, next) => {
     return authMiddleware(c, next);
 });
 
-app.use('/*', cors({
-    origin: '*',
-    allowMethods: ['POST', 'GET', 'OPTIONS'],
-    credentials: true,
-}));
 
 curlRoutes.addTo(app);
 
