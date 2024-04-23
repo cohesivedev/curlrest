@@ -44,11 +44,9 @@ async function runCurl(options = DEFAULTS) {
     // Use a rotating proxy instead!
     try {
         const { stdout, stderr } = await execFile(curlPath, args, { shell: "/bin/sh" });
-        console.log(stderr);
         return { stderr, stdout };
     } catch (e) {
         const { stdout, stderr } = e;
-        console.log(stderr);
         return { stderr, stdout };
     }
 }
