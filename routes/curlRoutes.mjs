@@ -18,8 +18,7 @@ const DEFAULTS = {
 
 async function runCurl(options = DEFAULTS) {
 
-    let { url, method, headers, body, curlPath, verbose, followRedirect } = options;
-    const { username, password, host } = options.proxy;
+    let { url, method, headers, body, curlPath, verbose, followRedirect, proxy } = options;
 
     const headerArgs = Object.entries(headers).map(([key, value]) => `-H '${key}: ${value}'`);
 
@@ -32,8 +31,8 @@ async function runCurl(options = DEFAULTS) {
 
     const args = [
         `-X '${method}'`,
-        `-U '${username}:${password}'`,
-        `-x '${host}'`,
+        proxy ? `-U '${proxy.username}:${proxy.password}'` : '',
+        proxy ? `-x '${host}'` : '',
         verbose ? '-v' : '',
         followRedirect ? '-L' : '',
         ...headerArgs,
