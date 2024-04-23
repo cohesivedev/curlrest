@@ -19,6 +19,7 @@ app.use('/*', async (c, next) => {
 
 app.use('/api/*', cors({
     origin: '*',
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
 }));
 
 curlRoutes.addTo(app);
