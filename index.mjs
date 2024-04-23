@@ -17,7 +17,9 @@ app.use('/*', async (c, next) => {
     return authMiddleware(c, next);
 });
 
-app.use('/api/*', cors());
+app.use('/api/*', cors({
+    origin: '*',
+}));
 
 curlRoutes.addTo(app);
 
