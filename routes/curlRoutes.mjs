@@ -1,6 +1,8 @@
+import { v4 as uuidv4 } from 'uuid';
 import util from 'util';
 import { execFile as execFileNonPromise } from 'child_process';
 const execFile = util.promisify(execFileNonPromise);
+import db from '../db.mjs';
 
 const DEFAULTS = {
     proxy: {
@@ -13,12 +15,13 @@ const DEFAULTS = {
     headers: {},
     method: 'get',
     url: null,
-    curlPath: '/usr/bin/curl'
 };
+
+const { CURL_PATH = '/usr/bin/curl' } = process.env;
 
 async function runCurl(options = DEFAULTS) {
 
-    let { url, method, headers, body, curlPath, verbose, followRedirect, proxy } = options;
+    let { url, method, headers, body, verbose, followRedirect, proxy } = options;
 
     const headerArgs = Object.entries(headers).map(([key, value]) => `-H '${key}: ${value}'`);
 
@@ -26,8 +29,6 @@ async function runCurl(options = DEFAULTS) {
     if (body) {
         body = `--data-raw '${body}'`;
     }
-
-    curlPath = curlPath || DEFAULTS.curlPath;
 
     const args = [
         `-X '${method}'`,
@@ -40,10 +41,8 @@ async function runCurl(options = DEFAULTS) {
         `'${url}'`
     ];
 
-
-    // Use a rotating proxy instead!
     try {
-        const { stdout, stderr } = await execFile(curlPath, args, { shell: "/bin/sh" });
+        const { stdout, stderr } = await execFile(CURL_PATH, args, { shell: '/bin/sh' });
         return { stderr, stdout };
     } catch (e) {
         const { stdout, stderr } = e;
@@ -52,9 +51,26 @@ async function runCurl(options = DEFAULTS) {
 }
 
 function addTo(app) {
-    app.post('/curlSync', async c => {
+    app.post('/curl/sync', async c => {
         const options = await c.req.json();
         return c.json(await runCurl(options));
+    });
+
+    app.post('/curl/batch', async c => {
+        const { requests } = await c.req.json();
+        const batch_id = uuidv4();
+
+        const batched = requests.map(r => ({
+            batch_id,
+            url: r.url,
+            params: JSON.stringify(r),
+        }));
+
+        await db.insertBatch(batched);
+
+        return c.json({
+            batch_id,
+        });
     });
 }
 

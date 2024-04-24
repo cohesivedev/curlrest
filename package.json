@@ -6,6 +6,9 @@
   "license": "MIT",
   "dependencies": {
     "@hono/node-server": "^1.11.0",
-    "hono": "^4.2.7"
+    "better-sqlite3": "^9.5.0",
+    "hono": "^4.2.7",
+    "kysely": "^0.27.3",
+    "uuid": "^9.0.1"
   }
 }
