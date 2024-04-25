@@ -1,6 +1,9 @@
 import { sql } from 'kysely';
 
 export async function up(db) {
+    await sql`PRAGMA journal_mode = wal;`
+        .execute(db);
+
     await db.schema
         .createTable('requests')
         .addColumn('id', 'integer', (col) => col.primaryKey())

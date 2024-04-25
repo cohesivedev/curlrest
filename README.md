@@ -16,7 +16,7 @@ Client side code:
 const username = 'hello';
 const password = 'world';
 
-const res = await fetch('http://localhost:3001/curlSync', {
+const res = await fetch('http://localhost:3001/curl/sync', {
     headers: {
         'content-type': 'application/json',
         'authorization': 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
@@ -48,6 +48,8 @@ console.log(res.stderr);
 ## Why do it
 
 Edge-compute environments (i.e. Cloudflare Workers, Lambda@Edge) cannot fully run everything we want like CLI-based tooling such as `curl`. Using curl as a REST API bypasses these limitations with a $6/month VPS. We usually want to do this for better tool interop: Chrome DevTools can copy network requests as cURL strings so using that should be nearly as easy as running it in CLI.
+
+This is a priviledged service and isn't intended to be open for public use. We safeguard the running environment against basic human mistakes that happen occasionally. All authenticated users have the capacity to spawn `curl` processes and affect the filesystem
 
 ### Use cases
 

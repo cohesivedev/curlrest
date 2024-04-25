@@ -1,12 +1,17 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import SQLite from 'better-sqlite3';
-import { FileMigrationProvider, Migrator, Kysely, SqliteDialect } from 'kysely'
+import { sql, FileMigrationProvider, Migrator, Kysely, SqliteDialect } from 'kysely'
 
 const DB_PATH = 'curl.sqlite3';
 let db;
 
 async function migrateToLatest() {
     await ensureDB();
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
 
     const migrator = new Migrator({
         db,
@@ -15,7 +20,7 @@ async function migrateToLatest() {
             path,
             migrationFolder: path.join(__dirname, 'migrations'),
         }),
-    })
+    });
 
     const { error, results } = await migrator.migrateToLatest();
 
@@ -50,13 +55,17 @@ async function ensureDB() {
     await migrateToLatest();
 }
 
-function insertBatch(requests) {
+async function insertBatch(requests) {
+    await ensureDB();
+
     return db.insertInto('requests')
         .values(requests)
         .execute();
 }
 
-function getBatchById(batch_id) {
+async function getBatchById(batch_id) {
+    await ensureDB();
+
     return db.selectFrom('requests')
         .selectAll()
         .where('batch_id', '=', batch_id)
@@ -64,30 +73,47 @@ function getBatchById(batch_id) {
 }
 
 async function getBatchProgressById(batch_id) {
-    const batchTotalCount = await db.selectFrom('requests')
-        .select((eb) => eb.fn.count('id'))
-        .where('batch_id', '=', batch_id)
-        .execute();
+    await ensureDB();
 
-    const batchCompletedCount = await db.selectFrom('requests')
-        .select((eb) => eb.fn.count('id'))
-        .where('batch_id', '=', batch_id)
-        .where('completed_at', '=', batch_id)
-        .execute();
+    const batchTotalCount = Object.values(
+        await db.selectFrom('requests')
+            .select((eb) => eb.fn.count('id'))
+            .where('batch_id', '=', batch_id)
+            .executeTakeFirst()
+    )[0];
 
-    return { batch_id, completed: batchCompletedCount, total: batchTotalCount };
+    const batchCompletedCount = Object.values(
+        await db.selectFrom('requests')
+            .select(eb => eb.fn.count('id'))
+            .where('batch_id', '=', batch_id)
+            .where('completed_at', 'is not', '')
+            .where('completed_at', 'is not', null)
+            .executeTakeFirst()
+    )[0];
+
+    return {
+        batch_id,
+        completed: batchCompletedCount,
+        total: batchTotalCount,
+        done: batchCompletedCount === batchTotalCount,
+    };
 }
 
-function getOldestIncomplete(count = 6) {
+async function getOldestIncomplete(count = 6) {
+    await ensureDB();
+
     return db.selectFrom('requests')
         .selectAll()
-        .where('completed_at', 'is', 'null')
+        .where('completed_at', 'is', null)
+        .where('completed_at', 'is', '')
         .orderBy('created_at', 'asc')
         .limit(count)
         .execute();
 }
 
-function updateRequest(request) {
+async function updateRequest(request) {
+    await ensureDB();
+
     return db.updateTable('requests')
         .set(request)
         .where('id', '=', request.id)
