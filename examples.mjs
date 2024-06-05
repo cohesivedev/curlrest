@@ -9,12 +9,14 @@ const headers = {
     'Authorization': 'Basic ' + Buffer.from('a:a').toString('base64'),
 };
 
-function run(type) {
+const HOST = process.env.HOST || 'http://localhost:3001';
 
+const { PROXYUSER, PROXYPASS } = process.env;
+
+function run(type) {
     switch (type) {
         case 'sync-with-proxy':
-            const { PROXYUSER, PROXYPASS } = process.env;
-            fetch('http://localhost:3001/curl/sync', {
+            fetch(`${HOST}/curl/sync`, {
                 headers,
                 method: 'post',
                 body: JSON.stringify({
@@ -31,7 +33,15 @@ function run(type) {
                 })
             }).then(res => res.json()).then(res => console.log(res));
         case 'sync':
-
+            fetch(`${HOST}/curl/sync`, {
+                headers,
+                method: 'post',
+                body: JSON.stringify({
+                    method: 'GET',
+                    followRedirect: true,
+                    url: 'https://www.bbc.com/news/world-asia-india-68968593',
+                })
+            }).then(res => res.json()).then(res => console.log(res));
 
             break;
         case 'batch':
@@ -67,7 +77,7 @@ function run(type) {
                 },
             ].filter(Boolean);
 
-            fetch('http://localhost:3001/curl/batch', {
+            fetch(`${HOST}/curl/batch`, {
                 method: 'post',
                 headers,
                 body: JSON.stringify(requests),
@@ -75,13 +85,13 @@ function run(type) {
             break;
 
         case 'progress':
-            fetch('http://localhost:3001/curl/batch/progress/06034490-8d50-41ca-a4ab-e5c5ef6d9b83', {
+            fetch(`${HOST}/curl/batch/progress/06034490-8d50-41ca-a4ab-e5c5ef6d9b83`, {
                 headers,
             }).then(res => res.json()).then(res => console.log(res));
             break;
 
         case 'churn':
-            fetch('http://localhost:3001/curl/batch/churn?count=3', {
+            fetch(`${HOST}/curl/batch/churn?count=3`, {
                 headers,
             }).then(res => res.text()).then(res => console.log(res));
             break;

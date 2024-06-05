@@ -5,6 +5,7 @@ import db from '../db.mjs';
 function addTo(app) {
     app.post('/curl/sync', async c => {
         const options = await c.req.json();
+        console.log(options.method, options.url);
         return c.json(await curl.run(options));
     });
 
